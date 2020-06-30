@@ -229,7 +229,7 @@ function ValueOrNull($value)
 }
 
 function DateTimeToTimestamp($datetime){
-    [Math]::Floor(1000 * (Get-Date -Date $datetime -UFormat %s))
+    return [Math]::Floor(1000 * (Get-Date -Date $datetime -UFormat %s))
 }
 
 <#
@@ -294,14 +294,12 @@ function global:Invoke-FourKeyMetricsReportGeneration {
         [Parameter(Mandatory=$true)]
         [string] $CheckoutLocation,
         # Name of the product we are reporting on (used as a label in reports)
-        [Parameter(Mandatory=$true)]
+		[Parameter(Mandatory=$true)]
         [string] $ProductName,
-        # The pattern for annotated tags in fnmatch format for git log
-        [Parameter(Mandatory=$true)]
-        [string] $ReleaseTagPattern,
-        # The pattern for fix tags - in powershell wild card format
-        [Parameter(Mandatory=$true)]
-        [string] $FixTagPattern,
+        # The pattern for annotated tags in fnmatch format for git log (default: gitflow)
+        [string] $ReleaseTagPattern = "*.*.*",
+        # The pattern for fix tags - in powershell wild card format (default: gitflow)
+        [string] $FixTagPattern = "*.*.[1-99]", 
         # Name for the report package we will deploy to Octopus
         [string] $ReportPackageName,
         # Version number to publish the report under
@@ -309,7 +307,7 @@ function global:Invoke-FourKeyMetricsReportGeneration {
         # Optional. Filters commits to a particular set of sub directories for the product we are interested in
         [string[]] $RepoSubDirs = (""),
         # Optional. A start date to filter tags.  Only tags after this date will be used.
-        [datetime] $StartDate = "01/01/2018",
+        [datetime] $StartDate = "01/01/2019",
         # Optional. How many months back to report on
         [int] $LookbackMonths = 12,
         # Optional. The size (in days) of the rolling window used for metric averaging
