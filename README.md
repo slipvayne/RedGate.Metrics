@@ -2,6 +2,8 @@
 Metric generation used at Redgate Software
 
 Original from https://github.com/red-gate/RedGate.Metrics
+This was adjusted to work with git flow releases. 
+
 . .\FourKeyMetrics.ps1
 Invoke-FourKeyMetricsReportGeneration
 
