@@ -1,6 +1,10 @@
 # RedGate.Metrics
 Metric generation used at Redgate Software
+
 Original from https://github.com/red-gate/RedGate.Metrics
+. .\FourKeyMetrics.ps1
+Invoke-FourKeyMetricsReportGeneration
+
 
 ## Four Key Metrics
 The State of DevOps reports have focused on data-driven and statistical analysis of high-performing organizations. The result of this multi-year research, published in the book "Accelerate", demonstrates a direct link between organizational performance and software delivery performance.

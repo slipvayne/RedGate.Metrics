@@ -6,10 +6,10 @@ function Get-AverageMetricsForPeriod($releaseMetrics, $endDate) {
     $releaseCount = $releaseMetrics.Count
     $failedReleaseCount = @($releaseMetrics | Where-Object { $_.IsFix }).Count
 
-    if ($releaseCount -gt 0){
-        $deploymentFrequencyDays = ($releaseMetrics | ForEach-Object {$_.Interval.TotalDays} | Measure-Object -Average).Average;
+    if ($releaseCount -gt 0) {
+        $deploymentFrequencyDays = ($releaseMetrics | ForEach-Object { $_.Interval.TotalDays } | Measure-Object -Average).Average;
         $failRate = $failedreleaseCount / $releaseCount
-        $leadTimeMeasures = $releaseMetrics | Where-Object {$null -ne $_.AverageCommitAge } | ForEach-Object { $_.AverageCommitAge.TotalDays } | Measure-Object -Average
+        $leadTimeMeasures = $releaseMetrics | Where-Object { $null -ne $_.AverageCommitAge } | ForEach-Object { $_.AverageCommitAge.TotalDays } | Measure-Object -Average
         $leadTimeAverage = $leadTimeMeasures.Average;
     }
     else {
@@ -18,7 +18,7 @@ function Get-AverageMetricsForPeriod($releaseMetrics, $endDate) {
         $leadTimeAverage = $null;
     }
 
-    if ($failedreleaseCount -gt 0){
+    if ($failedreleaseCount -gt 0) {
         $mttrMeasures = $releaseMetrics | Where-Object { $_.IsFix } | ForEach-Object { $_.Interval.TotalHours } | Measure-Object -Average
         $mttrAverage = $mttrMeasures.Average;
     }
@@ -41,9 +41,9 @@ function Get-AverageMetricsForPeriod($releaseMetrics, $endDate) {
 Identify a list of releases, based on repository data
 #>
 function Get-Releases($releaseTagPattern, $fixTagPattern ) {
-    $rawReleaseTags = (git for-each-ref --sort='-taggerdate' --format='%(tag),%(taggerdate:iso8601),%(refname),' "refs/tags/$releaseTagPattern")
+    $rawReleaseTags = (git for-each-ref --sort='-taggerdate' --format='%(tag),%(taggerdate:iso8601),%(refname),' "refs/tags/*.*.*")
 
-    if ($LastExitCode -ne 0){
+    if ($LastExitCode -ne 0) {
         throw "Unable to analyse analysis root. Is the analysis root a git repository?"
     }
 
@@ -54,11 +54,14 @@ function Get-Releases($releaseTagPattern, $fixTagPattern ) {
             continue
         }
 
+        #Write-Host ($split[0] -match $fixTagPattern) + "Rele":$split[0]
+
         [PSCustomObject]@{
             Tag   = $split[0];
             Date  = [DateTime]::ParseExact($split[1], "yyyy-MM-dd HH:mm:ss zzz", $null);
-            IsFix = ($split[0] -like $fixTagPattern)
+            IsFix = ($split[0] -match $fixTagPattern)
         }
+        
     }
 }
 
@@ -78,7 +81,7 @@ function Get-CommitsBetweenTags($start, $end, $subDirs) {
 }
 
 function Assert-ReleaseShouldBeConsidered($thisReleaseTag, $ignoreReleases) {
-    return !($ignoreReleases | Where-Object {$thisReleaseTag -Like $_})
+    return !($ignoreReleases | Where-Object { $thisReleaseTag -Like $_ })
 }
 
 <#
@@ -89,6 +92,7 @@ function Get-ReleaseMetrics($releases, $subDirs, $startDate, $ignoreReleases) {
     $thisRelease = $releases[0]
     for ($i = 1; $i -lt $releases.Count; $i++) {
         $lastRelease = $releases[$i]
+        #Write-Host $lastRelease
 
         if (Assert-ReleaseShouldBeConsidered $ThisRelease.Tag $ignoreReleases) {
             $commitAges = Get-CommitsBetweenTags $lastRelease.Tag $thisRelease.Tag $subDirs | Foreach-Object -Process { $thisRelease.Date - $_.Date } | Sort-Object
@@ -131,13 +135,13 @@ function global:Get-ReleaseMetricsForCheckout {
     [CmdletBinding()]
     param(
         # The path to the repo
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$checkoutLocation,
         # The pattern for annotated tags in fnmatch format for git log
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$releaseTagPattern,
         # The pattern for fix tags - in powershell wild card format
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$fixTagPattern,
         # A start date to filter tags.  Only tags after this date will be used.
         [datetime]$startDate,
@@ -191,13 +195,13 @@ function global:New-FourKeyMetricsReport {
     [CmdletBinding()]
     param(
         # The output of Get-FourKeyMetrics
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $metrics,
         # Product name to show in the report
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$productName,
         # The text to display in the window size caption
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$windowSize,
         # Optional. Location for the output file to be created at
         [string]$outFilePath = "."
@@ -208,27 +212,26 @@ function global:New-FourKeyMetricsReport {
     $report = New-Item -Path $outFilePath -Name 'index.html' -Force
     $data = ($metrics | ForEach-Object { ConvertTo-JsonWithJavascript $_ }) -join ",`r`n"
     Get-Content "$PSScriptRoot\FourKeyMetricsTemplate.html" -Raw | 
-        ForEach-Object { 
-            $_ -replace "REPLACEME", ($data) `
-               -replace "REPLACEREPO", $productName `
-               -replace "REPLACEWINDOWSIZE", $windowSize `
-               -replace "REPORTSTARTDATE", "new Date($(DateTimeToTimestamp($reportStartDate)))" `
-               -replace "REPORTENDDATE", "new Date($(DateTimeToTimestamp($reportEndDate)))"
-        } |
-        Out-File $report -Encoding ASCII -Force
+    ForEach-Object { 
+        $_ -replace "REPLACEME", ($data) `
+            -replace "REPLACEREPO", $productName `
+            -replace "REPLACEWINDOWSIZE", $windowSize `
+            -replace "REPORTSTARTDATE", "new Date($(DateTimeToTimestamp($reportStartDate)))" `
+            -replace "REPORTENDDATE", "new Date($(DateTimeToTimestamp($reportEndDate)))"
+    } |
+    Out-File $report -Encoding ASCII -Force
     return $report
 }
 
-function ConvertTo-JsonWithJavascript($period){
+function ConvertTo-JsonWithJavascript($period) {
     "[new Date($(DateTimeToTimestamp($period.EndDate))), $(ValueOrNull($period.DeploymentFrequencyDays)), $(ValueOrNull($period.LeadTimeDays)), $(ValueOrNull($period.FailRate)), $(ValueOrNull($period.MttrHours))]"
 }
 
-function ValueOrNull($value)
-{
+function ValueOrNull($value) {
     if ($null -eq $value) { "null" } else { $value }
 }
 
-function DateTimeToTimestamp($datetime){
+function DateTimeToTimestamp($datetime) {
     return [Math]::Floor(1000 * (Get-Date -Date $datetime -UFormat %s))
 }
 
@@ -247,15 +250,15 @@ function global:Publish-FourKeyMetricsReport {
     [CmdletBinding()]
     param(
         # The output of New-FourKeyMetricsReport
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $reportFile,
         # Name to use for the Octopus Package. Recommend 'FourKeyMetrics-[ProductName]'.
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$packageName,
         # Optional. API key for Octopus Deploy. $null/empty to skip publishing to Octopus
         [string]$OctopusFeedApiKey,
         # Semver-compatible version number for the Octopus package.
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$versionNumber
     )
 
@@ -263,8 +266,7 @@ function global:Publish-FourKeyMetricsReport {
 
     Compress-Archive -Path $reportFile -CompressionLevel Optimal -DestinationPath $outputZip -Force
 
-    if ($OctopusFeedApiKey)
-    {
+    if ($OctopusFeedApiKey) {
         try {
             $packagePath = Resolve-Path $outputZip
             $wc = new-object System.Net.WebClient
@@ -291,15 +293,15 @@ function global:Invoke-FourKeyMetricsReportGeneration {
         # Optional. The API key of the Octopus Deploy server to push packages to. $null means don't publish to Octopus
         [string] $OctopusFeedApiKey,
         # The location of the checked out repository to analyse
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $CheckoutLocation,
         # Name of the product we are reporting on (used as a label in reports)
-		[Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $ProductName,
         # The pattern for annotated tags in fnmatch format for git log (default: gitflow)
-        [string] $ReleaseTagPattern = "*.*.*",
+        [string] $ReleaseTagPattern = "(\d+)\.(\d+)\.0",
         # The pattern for fix tags - in powershell wild card format (default: gitflow)
-        [string] $FixTagPattern = "*.*.[1-99]", 
+        [string] $FixTagPattern = "(\d+)\.(\d+)\.[1-99]", 
         # Name for the report package we will deploy to Octopus
         [string] $ReportPackageName,
         # Version number to publish the report under
@@ -344,12 +346,12 @@ function global:Invoke-FourKeyMetricsReportGeneration {
     return $reportFile
 }
 
-function PublishCredentialsProvided($OctopusFeedApiKey, $ReportPackageName, $ReportVersionNumber)
-{
+function PublishCredentialsProvided($OctopusFeedApiKey, $ReportPackageName, $ReportVersionNumber) {
     if ($ReportPackageName -eq '' -Or $OctopusFeedApiKey -eq '' -Or $ReportVersionNumber -eq '') {
         Write-Warning "Publish credentials not provided - skipping publish step"
         $false
-    } else { $true }
+    }
+    else { $true }
 }
 
 <#
@@ -360,10 +362,10 @@ function Measure-LeadTimeData {
     [CmdletBinding()]
     param(
         # The location of the checked out repository to analyse
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $CheckoutLocation,
         # The pattern for annotated tags in fnmatch format for git log
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $ReleaseTagPattern,
         # Optional. A start date to filter tags.  Only tags after this date will be used.
         [datetime] $StartDate
@@ -380,7 +382,7 @@ function Measure-LeadTimeData {
 
         $message = "$($LastRelease.Tag) -> $($thisRelease.Tag) Released $($ThisRelease.Date)"
         Add-Content LeadTimeData.txt $message
-        foreach ($commit in $commitsInRelease){
+        foreach ($commit in $commitsInRelease) {
             Add-Content LeadTimeData.txt $commit
         }
         Add-Content LeadTimeData.txt " "
