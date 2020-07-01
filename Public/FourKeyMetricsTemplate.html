@@ -44,31 +44,31 @@
             document.getElementById(elementId).getElementsByClassName("content")[0]
           );
           chart.draw(dataView, {
-            vAxis: { title: vAxisTitle, format, minValue: 0, maxValue: 1 },
+            vAxis: { title: vAxisTitle, format, minValue: 0, maxValue: 1 ,  textStyle:{color: '#FFF'} },
              legend: { position: "none" },
 			backgroundColor: {
-				fill: '#dddddd',
+				fill: '#212121',
 				fillOpacity: 0.8
 			  },
             series: [{ color }],
 			chartArea: { width: "80%", height: "80%", 'backgroundColor': {
-				'fill': '#dddddd',
+				'fill': '#212121',
 				'opacity': 100
 			 }, },
             pointSize: 6,
             trendlines: { 0: { pointSize: 0 }},
             interpolateNulls: true,
-            hAxis: {minValue: REPORTSTARTDATE, maxValue: REPORTENDDATE}
+            hAxis: {minValue: REPORTSTARTDATE, maxValue: REPORTENDDATE,  textStyle:{color: '#FFF'}}
           });
         });
       }
     </script>
     <style>
-     html, body { 
+ html, body { 
         margin: 0;
         padding: 0;
         height: 100vh;
-		background: #dddddd;
+		background: #212121;
         font-family: Roboto, Arial, Helvetica, sans-serif;
       }
 
@@ -100,12 +100,13 @@
         text-align: center;
         margin: 0.3em 0;
         font-weight: bold;
+		color: #ffffff;
       }
 
       .description {
         grid-area: description;
         margin: 0;
-        color: #111111;
+        color: #aaaaaa;
       }
 
       #deploy-freq {

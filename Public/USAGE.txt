@@ -1,0 +1,8 @@
+. .\FourKeyMetrics.ps1
+
+function BulkRelease($path)
+ { 
+Invoke-FourKeyMetricsReportGeneration -CheckoutLocation "C:\REPO\$path" -ProductName $($path -replace "\\","_")  -OutFilePath C:\Temp\Report
+ }
+
+BulkRelease "Service1" ..
