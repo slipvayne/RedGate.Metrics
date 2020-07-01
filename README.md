@@ -1,11 +1,18 @@
 # RedGate.Metrics
 Metric generation used at Redgate Software
-
-Original from https://github.com/red-gate/RedGate.Metrics
+Forked from https://github.com/red-gate/RedGate.Metrics
 This was adjusted to work with git flow releases. 
 
-. .\FourKeyMetrics.ps1
+## How To
+
+Import File:
+. .\FourKeyMetrics.ps1     
+
 Invoke-FourKeyMetricsReportGeneration
+or
+Invoke-FourKeyMetricsReportGeneration -CheckoutLocation "C:\REPO\Project" -ProductName "Project"  -OutFilePath C:\Temp\Report
+
+
 
 
 ## Four Key Metrics

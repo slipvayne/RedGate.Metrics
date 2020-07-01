@@ -72,6 +72,7 @@ Get a list of all commits added to master between two release tags
 function Get-CommitsBetweenTags($start, $end, $subDirs) {
     $rawCommits = git log --pretty=format:"%h,%ai" "$start..$end" --no-merges -- $subDirs
     foreach ($commit in $rawCommits) {
+        #Write-Host $commit
         $split = $commit.Split(",")
         [PSCustomObject]@{
             SHA  = $split[0];
@@ -209,7 +210,7 @@ function global:New-FourKeyMetricsReport {
 
     $reportStartDate = $metrics[0].EndDate
     $reportEndDate = $metrics[-1].EndDate
-    $report = New-Item -Path $outFilePath -Name 'index.html' -Force
+    $report = New-Item -Path $outFilePath -Name $productName'.html' -Force
     $data = ($metrics | ForEach-Object { ConvertTo-JsonWithJavascript $_ }) -join ",`r`n"
     Get-Content "$PSScriptRoot\FourKeyMetricsTemplate.html" -Raw | 
     ForEach-Object { 
@@ -378,11 +379,14 @@ function Measure-LeadTimeData {
     for ($i = 1; $i -lt $releases.Count; $i++) {
         $lastRelease = $releases[$i]
 
-        $commitsInRelease = git log --pretty=format:"%s" --grep="Merge pull request" "$($lastRelease.Tag)..$($thisRelease.Tag)"
+        Write-Host $lastRelease.Tag + "|"+ $thisRelease.Tag
+
+        $commitsInRelease = git log --pretty=format:"%s" --grep="Merge branch 'release/*.*.*'" "$($lastRelease.Tag)..$($thisRelease.Tag)"
 
         $message = "$($LastRelease.Tag) -> $($thisRelease.Tag) Released $($ThisRelease.Date)"
         Add-Content LeadTimeData.txt $message
         foreach ($commit in $commitsInRelease) {
+            #Write-Host $commit
             Add-Content LeadTimeData.txt $commit
         }
         Add-Content LeadTimeData.txt " "
