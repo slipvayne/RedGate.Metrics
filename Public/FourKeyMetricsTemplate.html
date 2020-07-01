@@ -45,9 +45,16 @@
           );
           chart.draw(dataView, {
             vAxis: { title: vAxisTitle, format, minValue: 0, maxValue: 1 },
-            legend: { position: "none" },
+             legend: { position: "none" },
+			backgroundColor: {
+				fill: '#aaaaaa',
+				fillOpacity: 0.8
+			  },
             series: [{ color }],
-            chartArea: { width: "80%", height: "80%" },
+			chartArea: { width: "80%", height: "80%", 'backgroundColor': {
+				'fill': '#aaaaaa',
+				'opacity': 100
+			 }, },
             pointSize: 6,
             trendlines: { 0: { pointSize: 0 }},
             interpolateNulls: true,
@@ -57,10 +64,11 @@
       }
     </script>
     <style>
-      html, body { 
+     html, body { 
         margin: 0;
         padding: 0;
         height: 100vh;
+		background: #aaaaaa;
         font-family: Roboto, Arial, Helvetica, sans-serif;
       }
 
@@ -97,7 +105,7 @@
       .description {
         grid-area: description;
         margin: 0;
-        color: #aaaaaa;
+        color: #111111;
       }
 
       #deploy-freq {
@@ -115,13 +123,12 @@
       #mttr {
         grid-area: bottomright;
       }
-
     </style>
   </head>
 
   <body>
     <div class="grid">
-      <h1 class="title">Four Key Metrics for REPLACEREPO</h1>
+      <h1 class="title">REPLACEREPO</h1>
 
       <div id="deploy-freq" class="chart">
         <div class="title">Deployment Frequency</div>
