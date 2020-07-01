@@ -44,13 +44,15 @@
             document.getElementById(elementId).getElementsByClassName("content")[0]
           );
           chart.draw(dataView, {
-            vAxis: { title: vAxisTitle, format, minValue: 0, maxValue: 1 ,  textStyle:{color: '#FFF'} },
+           vAxis: { title: vAxisTitle, format, minValue: 0, maxValue: 1 ,  textStyle:{color: '#FFF'},  titleTextStyle:{color: '#FFF'} },
              legend: { position: "none" },
 			backgroundColor: {
 				fill: '#212121',
 				fillOpacity: 0.8
 			  },
             series: [{ color }],
+			textStyle:{color: '#FFF'},
+			titleTextStyle:{color: '#FFF'},
 			chartArea: { width: "80%", height: "80%", 'backgroundColor': {
 				'fill': '#212121',
 				'opacity': 100
