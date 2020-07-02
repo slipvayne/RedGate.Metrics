@@ -6,3 +6,5 @@ Invoke-FourKeyMetricsReportGeneration -CheckoutLocation "C:\REPO\$path" -Product
  }
 
 BulkRelease "Service1" ..
+
+(Check BulkGenerateReport, and CheckoutLocation)

@@ -225,7 +225,7 @@ function global:New-FourKeyMetricsReport {
 }
 
 function ConvertTo-JsonWithJavascript($period) {
-    "[new Date($(DateTimeToTimestamp($period.EndDate))), $(ValueOrNull($period.DeploymentFrequencyDays)), $(ValueOrNull($period.LeadTimeDays)), $(ValueOrNull($period.FailRate)), $(ValueOrNull($period.MttrHours))]"
+    "[new Date($(DateTimeToTimestamp($period.EndDate))), $(ValueOrNull($period.DeploymentFrequencyDays)), $(ValueOrNull($period.LeadTimeDays)), $(ValueOrNull($period.FailRate)), $(ValueOrNull($period.MttrHours/24))]"
 }
 
 function ValueOrNull($value) {
